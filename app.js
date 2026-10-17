@@ -43,50 +43,77 @@ POST /lead -> Agent | Fail
 }
 */
 
-import sqlite3, { Database } from 'sqlite3'
-let sql;
-
+import pkg from 'sqlite3';
+const { Database } = pkg;
 const db = new Database('./db.db')
 
 // === Tables ===
 db.exec(`
-    CREATE TABLE IF NOT EXISTS agent (
+    DROP TABLE IF EXISTS agent;
+    DROP TABLE IF EXISTS lead;
+    DROP TABLE IF EXISTS state;
+    DROP TABLE IF EXISTS state_agent;
+    `
+)
+db.exec(`
+    CREATE TABLE agent (
         id TEXT PRIMARY KEY,
         name TEXT,
         lead_count NUMBER,
         max_lead NUMBER,
-        last_lead TIMESTAMP,
-
+        last_lead TIMESTAMP
     )
     `)
 
 db.exec(`
-    CREATE TABLE IF NOT EXISTS lead (
+    CREATE TABLE lead (
         id TEXT PRIMARY KEY,
         s_id NUMBER NOT NULL,
         a_id TEXT,
         name TEXT,
         phone_number TEXT,
         email TEXT,   
-        FOREIGN KEY (s_id) REFERENCES state (id)
+        FOREIGN KEY (s_id) REFERENCES state (id),
         FOREIGN KEY (a_id) REFERENCES agents (id)
     )
     `)
 
 db.exec(`
-        CREATE TABLE IF NOT EXISTS state (
+        CREATE TABLE state (
             id NUMBER PRIMARY KEY,
-            name TEXT,
+            name TEXT
         )
         `
 )
 
 db.exec(`
-        CREATE TABLE IF NOT EXISTS state_agent (
+        CREATE TABLE state_agent (
             a_id TEXT,
             s_id NUMBER,
-            FOREIGN KEY (a_id) REFERENCES agent (id)
+            FOREIGN KEY (a_id) REFERENCES agent (id),
             FOREIGN KEY (s_id) REFERENCES state (id)
         )
         `)
 
+// === Seed ===
+let states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"]
+let statesMap = []
+for (let i = 0; i < states.length; i++) {
+    statesMap.push({ id: i + 1, name: states[i] })
+}
+
+const insertState = db.prepare(`
+    INSERT INTO state (id, name)
+    VALUES (?, ?)
+    ON CONFLICT(id) DO NOTHING
+  `);
+
+db.exec("BEGIN");
+try {
+    for (const state of statesMap) {
+        insertState.run(state.id, state.name);
+    }
+} catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+}

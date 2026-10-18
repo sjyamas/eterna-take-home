@@ -9,17 +9,17 @@ const lead = (state: State): Lead => {
     const id = nextLead++
     return { id, state, name: `lead${id}`, phoneNumber: '', email: '', time: 0 }
 }
-const agent = (states: State[], maxLead: number, online = true) => {
-    const a = new Agent(states, (x) => distro.assignAgent(x), maxLead, online)
+const agent = (id: number, states: State[], maxLead: number, online = true) => {
+    const a = new Agent(id, states, (x) => distro.assignAgent(x), maxLead, online)
     distro.addAgent(a)
     return a
 }
 const section = (title: string) => console.log(`\n== ${title}`)
 
 section('Agents join: 0 (California + Nevada, max 2), 1 (California, max 3), 2 (Texas, max 2, offline)')
-const a0 = agent(['California', 'Nevada'], 2)
-const a1 = agent(['California'], 3)
-const a2 = agent(['Texas'], 2, false)
+const a0 = agent(0, ['California', 'Nevada'], 2)
+const a1 = agent(1, ['California'], 3)
+const a2 = agent(2, ['Texas'], 2, false)
 
 section('Leads are pushed to the eligible agent with the lowest workload')
 distro.addLead(lead('California'))   // both at 0%, tie goes to agent 0 (added first)

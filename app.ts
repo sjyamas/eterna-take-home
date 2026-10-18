@@ -47,10 +47,12 @@ export class LeadDistro {
     private tick() { return ++this.time }
 
     addAgent(agent: Agent) {
+        if (this.agents.has(agent.id)) {
+            throw new Error(`Agent ${agent.id} already exists`)
+        }
         console.log(`Add agent ${agent.id}`)
         this.agents.set(agent.id, agent)
         this.assignAgent(agent)
-
     }
 
     assignAgent(agent: Agent) {
@@ -125,8 +127,6 @@ export class LeadDistro {
     }
 }
 
-let agentID = 0
-
 export class Agent {
     id: number
     states: State[]
@@ -137,8 +137,8 @@ export class Agent {
     leadIds: Set<number> = new Set()
     lastLead = 0
 
-    constructor(states: State[], pull: (agent: Agent) => void, maxLead = 5, online = true) {
-        this.id = agentID++
+    constructor(id: number, states: State[], pull: (agent: Agent) => void, maxLead = 5, online = true) {
+        this.id = id
         this.states = states
         this.maxLead = maxLead
         this.online = online

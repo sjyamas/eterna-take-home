@@ -7,7 +7,7 @@ An in-memory engine that routes incoming leads to licensed, online agents, balan
 Requires **Node 22.18+** (tested on Node 24).
 
 ```sh
-npm test        # 16 tests, using Node's built-in test runner
+npm test        # 17 tests, using Node's built-in test runner
 npm run demo    # plays a short scenario and prints each assignment
 ```
 
@@ -43,6 +43,7 @@ Supporting details:
 
 ## Assumptions
 
+- Agent and lead IDs come from the caller (upstream systems); the engine doesn't generate them. `addAgent` throws on an ID that's already registered.
 - Leads are assigned automatically; agents can't accept or reject them.
 - An agent's licensed states don't change.
 - Time is a logical counter, not wall-clock time. It only orders events.

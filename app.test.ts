@@ -11,13 +11,15 @@ const mkLead = (state: State): Lead =>
 // builds a fresh distro and registers agents with it
 function setup() {
     const distro = new LeadDistro()
+    const pull = (a: Agent) => distro.assignAgent(a)
+    let agentID = 0
     const mkAgent = (states: State[], maxLead = 5, online = true) => {
-        const agent = new Agent(states, (a) => distro.assignAgent(a), maxLead, online)
+        const agent = new Agent(agentID++, states, pull, maxLead, online)
         distro.addAgent(agent)
         return agent
     }
     const queued = (state: State) => distro.leadsByState.get(state)!.length
-    return { distro, mkAgent, queued }
+    return { distro, pull, mkAgent, queued }
 }
 
 describe('LeadDistro', () => {
@@ -55,6 +57,15 @@ describe('LeadDistro', () => {
             const b = mkAgent(['Utah'])
             distro.addLead(mkLead('Utah'))
             assert.equal(a.getLeadCount() + b.getLeadCount(), 1)
+        })
+
+        test('adding an agent with an existing id is rejected', () => {
+            const { distro, pull, mkAgent } = setup()
+            const a = mkAgent(['Ohio'])
+            distro.addLead(mkLead('Ohio'))
+            assert.throws(() => distro.addAgent(new Agent(a.id, ['Texas'], pull)))
+            assert.equal(distro.agents.get(a.id), a)   // original agent and its lead are kept
+            assert.equal(a.getLeadCount(), 1)
         })
     })
 

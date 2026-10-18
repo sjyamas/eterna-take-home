@@ -99,8 +99,6 @@ export class LeadDistro {
                 continue
             }
 
-            // CHECK: ranks by open slots, not load, so an agent at 6/10 beats an idle agent at 0/3.
-            // Doesn't match "prioritize: current workload" above; confirm which one you want.
             const workload = agent.getLeadCount() / agent.maxLead   // remaining capacity
             if (bestAgent) {
                 // 1. more remaining capacity wins

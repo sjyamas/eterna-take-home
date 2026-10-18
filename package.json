@@ -1,0 +1,13 @@
+{
+  "name": "eterna-take-home",
+  "private": true,
+  "description": "In-memory lead distribution: routes leads to licensed, online agents and queues the rest.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test app.test.ts",
+    "demo": "node demo.ts"
+  }
+}
